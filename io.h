@@ -2,7 +2,10 @@
 // Created by l2-wunderlichd on 22/04/2026.
 //
 
-#ifndef UNTITLED_IO_H
-#define UNTITLED_IO_H
+#ifndef IO_H
+#define IO_H
+#include "waveform.h"
 
-#endif //UNTITLED_IO_H
+int load_csv(const char *filename, WaveformSample *data, int rows);
+
+#endif
