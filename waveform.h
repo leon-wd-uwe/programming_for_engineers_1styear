@@ -20,4 +20,11 @@ typedef struct {
     double thd_percent;
 } WaveformSample; //Naming this struct WaveformSample
 
+//calling the functions established in waveform.c to the main from this header file (waveform.h)
+double calculate_rms(WaveformSample *data, int rows);
+double calculate_peak_to_peak(WaveformSample *data, int rows);
+double calculate_dc_offset(WaveformSample *data, int rows);
+int count_clipping_samples(WaveformSample *data, int rows);
+int check_tolerance_compliance(double rms_value);
+
 #endif //This terminates the conditional block started by #ifndef

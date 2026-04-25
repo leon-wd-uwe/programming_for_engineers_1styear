@@ -75,6 +75,24 @@ int count_clipping_samples(WaveformSample *data, int rows){
     return clipping_count;
 }
 
+//check if RMS is within 10% of 230V
+//returns 1 if compliant, 0 if out of tolerance
+int check_tolerance_compliance(double rms_value) {
+    const double NOMINAL_V = 230.0;
+    const double TOLERANCE_PERCENT = 0.10;
+
+    //Calculate the upper and lower boundaries of the RMS voltage to +-10%
+    double lower_limit = NOMINAL_V * (1.0 - TOLERANCE_PERCENT);//lower 90% boundary
+    double upper_limit = NOMINAL_V * (1.0 + TOLERANCE_PERCENT);//upper 110% boundary
+
+    //exclusive AND logic
+    if (rms_value >= lower_limit && rms_value <= upper_limit) {
+        return 1; // Compliant
+    } else {
+        return 0; // Non-compliant
+    }
+}
+
 
 
 
