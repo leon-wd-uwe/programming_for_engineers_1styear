@@ -26,7 +26,7 @@ double calculate_rms(WaveformSample *data, int rows, int phase_num) {
     }
 
     //average the squares, then Root the average (to reset the squaring we've done of val
-    return (double sqrt(sum_sq/rows)); //dividing the total sum of values by number of rows (which is 1000)
+    return sqrt(sum_sq / (double)rows); //dividing the total sum of values by number of rows (which is 1000)
     //returns this to the function called in main.c
 }
 
@@ -86,20 +86,18 @@ int count_clipping_samples(WaveformSample *data, int rows, int phase){
 
     for (int i = 0; i < rows; i++){
         //count times the signal goes over the limits of the sensor (flat-top reading on the wave)
-        if (phase == 0){total_voltage += data[i].phase_A_voltage;
-            if (data[i].phase_A_voltage >= SENSOR_LIMIT){
-                clipping_count++;
-            }
-        }
-        else if (phase == 1){total_voltage += data[i].phase_B_voltage;
-            if (data[i].phase_B_voltage >= SENSOR_LIMIT){
-                clipping_count++;
-            }
-        }
-        else {total_voltage += data[i].phase_C_voltage;
-            if (data[i].phase_C_voltage >= SENSOR_LIMIT) {
-                clipping_count++;
-            }
+        WaveformSample *current = &data[i];//assigns the address of current to the data array at the i-th pont
+        double val;
+
+        // Select the value once
+        if (phase == 0)      val = current->phase_A_voltage;
+        //-> gets the data from the address of phase_A_voltage and assigns that value to current
+        else if (phase == 1) val = current->phase_B_voltage;
+        else                 val = current->phase_C_voltage;
+
+        // Check the limit once
+        if (val >= SENSOR_LIMIT) {
+            clipping_count++;
         }
     }
 

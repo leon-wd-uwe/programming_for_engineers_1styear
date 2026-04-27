@@ -47,12 +47,16 @@ int load_csv(const char *filename, WaveformSample *data, int rows) {
             return 1;
         }
     }
+
+    // closing the pipeline
+    fclose(file);
+    return 0; //as long as it returns 0 at the end we're all good
 }
 
     //exporting the results to a text file
-    int save_results(const char *filename, double rms, double p2p, double dc, int clips, const char* status) {
+int save_results(const char *filename, double rms, double p2p, double dc, int clips, const char* status) {
         //opens the output pipeline
-        FILE *out = fopen(filename, "w");
+        FILE *out = fopen(filename, "a");//appends each phase after the previous (so we get A, B and C in the .txt file)
 
         if (out == NULL) {
             printf("Error: Could not create results file!\n");
@@ -69,8 +73,6 @@ int load_csv(const char *filename, WaveformSample *data, int rows) {
         // 3. Finalize
         fclose(out);
         return 0;
-    }
+}
 
-    // closing the pipeline
-fclose(file);
-    return 0; //as long as it returns 0 at the end we're all good
+
