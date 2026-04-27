@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "waveform.h" // Includes our struct "blueprint"
+#include "io.h"
 
 int main(int argc, char *argv[]) {
     //check if a filename was provided in the command line
     if (argc < 2) {/*if <2 then user forgot to indicate the desired file to open since they didn't
- *                  type at least 2 words (eg. ./PowerAnalyser log.csv) */
+ *                  type at least 2 words (e.g. ./PowerAnalyser log.csv) */
         printf("Usage: %s <filename.csv>\n", argv[0]);
         return 1;
     }
@@ -23,6 +24,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+// Physical data ingestion: pouring the CSV into our memory molds of the struct
+    if (load_csv(argv[1], data_log, num_rows) != 0) {
+        printf("Critical Error: Could not load data from %s\n", argv[1]);
+        free(data_log); // Clean up memory before exiting
+        return 1;
+    }
+    //STILL HAVENT PUT IN THE CSV FILE
+    //REMEMBER TO UPLOAD
 
     // --- START OF ANALYSIS ---
 
@@ -59,6 +68,11 @@ int main(int argc, char *argv[]) {
 
 
     printf("Memory allocated successfully for %d samples.\n", num_rows);
+
+    // 4. Save to .txt file
+    if (save_results("results.txt", rms_a, peak_p_a, dc_off_a, clips_a, status_text) == 0) {
+        printf("\nResults successfully saved to results.txt\n");
+    }
 
     // We release the memory now that we have used it for our usecase and leave it for other date to fill it later
     free(data_log);

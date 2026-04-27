@@ -8,6 +8,7 @@
 #ifndef WAVEFORM_H /*#ifndef = if not defined; checking if WAVEFORM_H has already been defined,
  * skipping the file if it already has, and lets the computer read it if not*/
 #define WAVEFORM_H //If the identifier is not found, this line defines it
+#include <stdio.h>
 
 typedef struct {
     double timestamp;
@@ -21,10 +22,11 @@ typedef struct {
 } WaveformSample; //Naming this struct WaveformSample
 
 //calling the functions established in waveform.c to the main from this header file (waveform.h)
-double calculate_rms(WaveformSample *data, int rows);
-double calculate_peak_to_peak(WaveformSample *data, int rows);
-double calculate_dc_offset(WaveformSample *data, int rows);
-int count_clipping_samples(WaveformSample *data, int rows);
+double calculate_rms(WaveformSample *data, int rows, int phase);
+double calculate_peak_to_peak(WaveformSample *data, int rows, int phase);
+double calculate_dc_offset(WaveformSample *data, int rows, int phase);
+int count_clipping_samples(WaveformSample *data, int rows, int phase);
 int check_tolerance_compliance(double rms_value);
 
-#endif //This terminates the conditional block started by #ifndef
+#endif //WAVEFORM_H
+//This terminates the conditional block started by #ifndef

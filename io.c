@@ -19,7 +19,7 @@ int load_csv(const char *filename, WaveformSample *data, int rows) {
     // skip the header row (the row of words/labels)
     char buffer[1024]; //temporary storage space for the labels
     fgets(buffer, sizeof(buffer), file); /*takes out all the words form the struct into a temporary
- *                                                          buffer so that the loop can start at the numbers*/
+ *                                         buffer so that the loop can start at the numbers*/
 
     // sorting loop to fill our 1,000 data 'molds' determined by WaveformSample
     for (int i = 0; i < rows; i++) {
@@ -27,10 +27,10 @@ int load_csv(const char *filename, WaveformSample *data, int rows) {
         // &data[i] is the address of the i-th storage compartment within the struct
         int read_count = fscanf(file,
                                 "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
-            //(above) 8 repeated long float (%lf) or double format for the 8 variables specifying the format to store in
-                                /*all the different fields in the struct are determined by the struct definition in
-                                 * waveform.h and we cycle through the blocks of available memory with the variable i
-                                 * filling them with the values we read*/
+                //(above) 8 repeated long float (%lf) or double format for the 8 variables specifying the format to store in
+                /*all the different fields in the struct are determined by the struct definition in
+                 * waveform.h and we cycle through the blocks of available memory with the variable i
+                 * filling them with the values we read*/
                                 &data[i].timestamp, //pointer of where this specific information should be stored
                                 &data[i].phase_A_voltage,
                                 &data[i].phase_B_voltage,
@@ -47,8 +47,30 @@ int load_csv(const char *filename, WaveformSample *data, int rows) {
             return 1;
         }
     }
+}
+
+    //exporting the results to a text file
+    int save_results(const char *filename, double rms, double p2p, double dc, int clips, const char* status) {
+        //opens the output pipeline
+        FILE *out = fopen(filename, "w");
+
+        if (out == NULL) {
+            printf("Error: Could not create results file!\n");
+            return 1;
+        }
+
+        //write the Report in a .txt file (Physical storage on disk)
+        fprintf(out, "--- Power Quality Report ---\n");
+        fprintf(out, "RMS Voltage: %.2f V (%s)\n", rms, status);
+        fprintf(out, "Peak-to-Peak: %.2f V\n", p2p);
+        fprintf(out, "DC Offset: %.2f V\n", dc);
+        fprintf(out, "Clipping Count: %d\n", clips);
+
+        // 3. Finalize
+        fclose(out);
+        return 0;
+    }
 
     // closing the pipeline
 fclose(file);
     return 0; //as long as it returns 0 at the end we're all good
-}
