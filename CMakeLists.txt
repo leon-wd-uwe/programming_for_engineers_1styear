@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
-project(untitled C)
+project(PowerAnalyser C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(untitled main.c waveform.h waveform.c io.h io.c)
+add_executable(PowerAnalyser main.c waveform.c io.c)
+target_link_libraries(PowerAnalyser m)

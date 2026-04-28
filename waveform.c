@@ -1,14 +1,13 @@
 //
-// Created by l2-wunderlichd on 22/04/2026.
+//waveform.c: Created by l2-wunderlichd on 22/04/2026.
 //
 
 #include <math.h>
-#include <stdio.h>
 #include "waveform.h"
 
 //calculating effective voltage (with the RMS)
 double calculate_rms(WaveformSample *data, int rows, int phase_num) {
-    double sum_sq = 0.0; //total number of samples: keeps track of total value of the data over time
+    double sum_sq = 0.0; // running sum of squared voltage samples: keeps track of total value of the data over time
 
     for (int i = 0; i < rows; i++) {
         //voltage measured at this instant for Phase A and square it to get meaning out of the values (effective voltage)
@@ -96,7 +95,8 @@ int count_clipping_samples(WaveformSample *data, int rows, int phase){
         else                 val = current->phase_C_voltage;
 
         // Check the limit once
-        if (val >= SENSOR_LIMIT) {
+        if (val >= SENSOR_LIMIT || val <= -SENSOR_LIMIT) {
+            //adds to clipping count when voltage is above or below tolerance (+324.9 and -324.9)
             clipping_count++;
         }
     }

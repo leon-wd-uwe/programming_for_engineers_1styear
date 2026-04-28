@@ -1,7 +1,6 @@
 //
-// Created by l2-wunderlichd on 22/04/2026.
+// waveform.c: reated by l2-wunderlichd on 22/04/2026.
 //
-// waveform.h
 
 //In yellow are Preprocessor Directives (#ifndef, #define, and #endif)
 //These do not run when your program is executing but are handled by the C Preprocessor before compiling
