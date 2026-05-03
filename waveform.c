@@ -21,10 +21,10 @@ double calculate_rms(WaveformSample *data, int rows, int phase_num) {
 
         sum_sq += (val * val); //sum_sq now adds the squared value of "val" to itself (for rms calculation)
 
-        // process repeats until we've gone through all values of i, and therefore of the 1000 samples is data
+        // process repeats until we've gone through all values of i, and therefore of the 1000 samples in data
     }
 
-    //average the squares, then Root the average (to reset the squaring we've done of val
+    //average the squares, then root the average (to reset the squaring we've done of val)
     return sqrt(sum_sq / (double)rows); //dividing the total sum of values by number of rows (which is 1000)
     //returns this to the function called in main.c
 }
@@ -35,7 +35,7 @@ double calculate_rms(WaveformSample *data, int rows, int phase_num) {
 double calculate_peak_to_peak(WaveformSample *data, int rows, int phase) {
     double max_v; double min_v;
 
-    // Initialising max/min with the first sample of the CHOSEN phase
+    //initialising max/min with the first sample of the CHOSEN phase
     // 0 = Phase A, 1 = Phase B, and 2 = Phase C.
     if (phase == 0)      { max_v = data[0].phase_A_voltage; min_v = data[0].phase_A_voltage; }
     else if (phase == 1) { max_v = data[0].phase_B_voltage; min_v = data[0].phase_B_voltage; }
@@ -49,7 +49,7 @@ double calculate_peak_to_peak(WaveformSample *data, int rows, int phase) {
         else if (phase == 1){current_val = data[i].phase_B_voltage;}
         else{current_val = data[i].phase_C_voltage;}
 
-        // If we see a value higher or lower than our current max or min, update it
+        //if we see a value higher or lower than our current max or min, update it
         if (current_val > max_v){max_v = current_val;}
         if (current_val < min_v){min_v = current_val;}
     }
@@ -88,13 +88,13 @@ int count_clipping_samples(WaveformSample *data, int rows, int phase){
         WaveformSample *current = &data[i];//assigns the address of current to the data array at the i-th pont
         double val;
 
-        // Select the value once
-        if (phase == 0)      val = current->phase_A_voltage;
+        //select the value once
+        if (phase == 0) {val = current->phase_A_voltage;}
         //-> gets the data from the address of phase_A_voltage and assigns that value to current
-        else if (phase == 1) val = current->phase_B_voltage;
-        else                 val = current->phase_C_voltage;
+        else if (phase == 1){val = current->phase_B_voltage;}
+        else {val = current->phase_C_voltage;}
 
-        // Check the limit once
+        //check the limit once
         if (val >= SENSOR_LIMIT || val <= -SENSOR_LIMIT) {
             //adds to clipping count when voltage is above or below tolerance (+324.9 and -324.9)
             clipping_count++;
@@ -111,7 +111,7 @@ int check_tolerance_compliance(double rms_value) {
     const double NOMINAL_V = 230.0;
     const double TOLERANCE_PERCENT = 0.10;
 
-    //Calculate the upper and lower boundaries of the RMS voltage to +-10%
+    //Calculate the upper and lower boundaries of the RMS voltage to +/-10%
     double lower_limit = NOMINAL_V * (1.0 - TOLERANCE_PERCENT);//lower 90% boundary
     double upper_limit = NOMINAL_V * (1.0 + TOLERANCE_PERCENT);//upper 110% boundary
 
@@ -123,3 +123,29 @@ int check_tolerance_compliance(double rms_value) {
     }
 }
 
+
+
+// ----- OPTIONAL DISTINCTION EXTENSION - STANDARD DEVIATION AND VARIANCE -----
+
+//we make a new function that will execute this formula => sqrt( (1/N) * sum( v(i) - mean )^2 )
+double calculate_std_dev(WaveformSample *data, int rows, int phase) {
+    //calculate the mean (same operation as dc_offset so will just reuse that)
+    double mean = calculate_dc_offset(data, rows, phase);
+
+    //sum the squared deviations from the mean
+    // (get the mean value and the sample, see the difference between them, square them, add them together)
+    //with this we can know how far from the mean the amplitude is straying (the "spread" around the mean value)
+    double sum_sq_diff = 0.0;
+    for (int i = 0; i < rows; i++) {
+        double val;
+        if (phase == 0){val = data[i].phase_A_voltage;} //seeing in which phase we're in to save correspondingly
+        else if (phase == 1){val = data[i].phase_B_voltage;}
+        else{val = data[i].phase_C_voltage;}
+
+        double diff = val - mean;
+        sum_sq_diff += (diff * diff);
+    }
+
+    //standard deviation = square root of the average squared deviation
+    return sqrt(sum_sq_diff / (double)rows);
+}

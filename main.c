@@ -15,28 +15,29 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Dynamic Memory (count how many data rows are in the file before allocating memory)
+    //dynamic memory (count how many data rows are in the file before allocating memory)
     // this means that we  open the file twice (once to count, once to read)
     int num_rows = count_csv_rows(argv[1]);
     if (num_rows <= 0) {
         printf("Error: File is empty or could not be read.\n");
         return 1;
     }
-    //now malloc is sized to the actual file
+    //now malloc is sized to the actual file size, no wasted space and no buffer overflow
 
     printf("Memory allocated successfully for %d samples.\n", num_rows);
 
-    // We request space for as many "molds" (structs of WaveformSample)as we need for our data
+    //we request space for as many "molds" (structs of WaveformSample) as we need for our data
     WaveformSample *data_log = (WaveformSample *)malloc(num_rows * sizeof(WaveformSample));
-    //malloc(num_rows * sizeof(WaveformSample) is = amount of bytes of WaveformSample * 1000[num_rows] = amount of RAM needed
+    //malloc(num_rows * sizeof(WaveformSample) is the amount of bytes of WaveformSample * 1000[num_rows] and
+    // this gives us the amount of RAM needed
 
-    // Safety Check to see if the space was available. if not, print error
+    //safety check to see if the space was available. if not, print error
     if (data_log == NULL) {// if computer is out of RAM then it tells you "Error, no more space"
         printf("Error: Memory allocation failed!\n");
         return 1;
     }
 
-    // Physical data ingestion: pouring the CSV into our memory molds of the struct
+    // physical data ingestion: pouring the CSV into the memory molds of the struct
     if (load_csv(argv[1], data_log, num_rows) != 0) {
         printf("Critical Error: Could not load data from %s\n", argv[1]);
         free(data_log); // Clean up memory before exiting
@@ -47,20 +48,22 @@ int main(int argc, char *argv[]) {
 
 // --- START OF ANALYSIS ---
 
-    // Array of names for the 3 phases
+    //array of names for the 3 phases
     const char *phase_labels[] = {"Phase A", "Phase B", "Phase C"};
     //cycling through the 3 phases and calculating with each one
     for (int phase = 0; phase < 3; phase++) {
-        // 1. Calculate metrics for the current phase (A, B or C)
+        // 1 - calculate metrics for the current phase (A, B or C)
         double rms = calculate_rms(data_log, num_rows, phase);//calls the waveform.c function for calculating rms
         double peak_2_peak = calculate_peak_to_peak(data_log, num_rows, phase);//calls peak to peak calculation func.
         double dc_off = calculate_dc_offset(data_log, num_rows, phase);//calls DC offset calculation function
         int clips = count_clipping_samples(data_log, num_rows, phase);//calls the clipping sample counter func.
 
-        // 2. Check compliance
+        double std_dev = calculate_std_dev(data_log, num_rows, phase); //calls STANDARD DEVIATION AND VARIANCE
+
+        // 2 -check compliance
         int is_compliant = check_tolerance_compliance(rms);//1 = compliant, 0 = non-compliant
 
-        // We create a temporary pointer to hold our "decision word" (true or false)
+        // we create a temporary pointer to hold our "decision word" (true or false)
         // 'const char*' means a string of text that won't change
         const char *status_text;
         if (is_compliant == 1) {
@@ -71,16 +74,18 @@ int main(int argc, char *argv[]) {
             status_text = "FAIL";
         }
 
-        // 3. Print the "Live Report" to the screen (Live Demonstration)
+        // 3 -prints the "Live Report" to the screen, this will repeat 3 times for the 3 phases
         printf("\n--- Power Quality Report: %s ---\n", phase_labels[phase]); //report on each phase
-        // We use %s to drop our chosen status_text into the sentence
+        //we use %s to drop our chosen status_text into the sentence
         printf("RMS Voltage: %.2f V (%s)\n", rms, status_text);
         printf("Peak-to-Peak: %.2f V\n", peak_2_peak);
         printf("DC Offset: %.2f V\n", dc_off);
         printf("Clipping Detected: %d samples\n", clips);
 
-        // 4. Save to the current phases results to the .txt file
-        if (save_results("results.txt", phase_labels[phase], phase, rms, peak_2_peak, dc_off, clips, status_text) == 0) {
+        printf("Standard Deviation: %.4f V\n", std_dev); //printing for STANDARD DEVIATION AND VARIANCE
+
+        // 4 - save to the current phases results to the .txt file
+        if (save_results("results.txt", phase_labels[phase], phase, rms, peak_2_peak, dc_off, clips, status_text, std_dev) == 0) {
             printf("Results for %s saved to results.txt\n", phase_labels[phase]);
         }
     }
@@ -88,9 +93,9 @@ int main(int argc, char *argv[]) {
 // --- END OF ANALYSIS ---
 
 
-    // We release the memory now that we have used it for our usecase and leave it for other date to fill it later
+    //we release the memory now that we have used it for our usecase and leave it for different data to fill it later
     free(data_log);
-    printf("Memory freed. Program exiting cleanly.\n");
+    printf("\n\nMemory freed. Program exiting cleanly.\n");
 
     return 0;
 }

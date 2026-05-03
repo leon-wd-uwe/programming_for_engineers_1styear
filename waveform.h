@@ -1,5 +1,5 @@
 //
-// waveform.c: reated by l2-wunderlichd on 22/04/2026.
+// waveform.h: reated by l2-wunderlichd on 22/04/2026.
 //
 
 //In yellow are Preprocessor Directives (#ifndef, #define, and #endif)
@@ -7,7 +7,6 @@
 #ifndef WAVEFORM_H /*#ifndef = if not defined; checking if WAVEFORM_H has already been defined,
  * skipping the file if it already has, and lets the computer read it if not*/
 #define WAVEFORM_H //If the identifier is not found, this line defines it
-#include <stdio.h>
 
 typedef struct {
     double timestamp;
@@ -26,6 +25,9 @@ double calculate_peak_to_peak(WaveformSample *data, int rows, int phase);
 double calculate_dc_offset(WaveformSample *data, int rows, int phase);
 int count_clipping_samples(WaveformSample *data, int rows, int phase);
 int check_tolerance_compliance(double rms_value);
+
+//STANDARD DEVIATION AND VARIANCE
+double calculate_std_dev(WaveformSample *data, int rows, int phase);
 
 #endif //WAVEFORM_H
 //This terminates the conditional block started by #ifndef

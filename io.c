@@ -28,12 +28,12 @@ int load_csv(const char *filename, WaveformSample *data, int rows) {
         // &data[i] is the address of the i-th storage compartment within the struct
         int read_count = fscanf(file,
                                 "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
-                //(above) 8 repeated long float (%lf) or double format for the 8 variables specifying the format to store in
-                /*all the different fields in the struct are determined by the struct definition in
-                 * waveform.h and we cycle through the blocks of available memory with the variable i
-                 * filling them with the values we read*/
+                //(above) 8 repeated long float (%lf) or double format for the 8 variables specifying the format to
+                // store in all the different fields in the struct are determined by the struct definition in
+                 //waveform.h and we cycle through the blocks of available memory with the variable i
+                 //filling them with the values we read
                                 &data[i].timestamp, //pointer of where this specific information should be stored
-                                &data[i].phase_A_voltage,
+                                &data[i].phase_A_voltage,//same for the rest
                                 &data[i].phase_B_voltage,
                                 &data[i].phase_C_voltage,
                                 &data[i].line_current,
@@ -64,12 +64,12 @@ int count_csv_rows(const char *filename) {
         return -1; // signals failure to the caller
     }
 
-    // Skip the header row ( we don't want to count the label line as data)
+    //skip the header row ( we don't want to count the label line as data)
     char buffer[1024];
     fgets(buffer, sizeof(buffer), file);
 
     int row_count = 0;
-    // Read lines until we hit the end of the file, counting each one
+    //read lines until we hit the end of the file, counting each one
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
         row_count++;
     }
@@ -81,7 +81,7 @@ int count_csv_rows(const char *filename) {
 
 
     //exporting the results to a text file
-int save_results(const char *filename, const char *phase_label, int phase_num, double rms, double p2p, double dc, int clips, const char* status)  {
+int save_results(const char *filename, const char *phase_label, int phase_num, double rms, double p2p, double dc, int clips, const char* status, double std_dev)  {
     const char *mode;
     if (phase_num == 0){// only enters this if we're back at phase A
         mode = "w"; //write to clear previous power quality reports
@@ -98,12 +98,14 @@ int save_results(const char *filename, const char *phase_label, int phase_num, d
         return 1;
     }
 
-    //write the Report in a .txt file (Physical storage on disk)
+    //write the report in a .txt file (the physical storage on disk)
     fprintf(out, "\n--- Power Quality Report: %s ---\n", phase_label);
     fprintf(out, "RMS Voltage: %.2f V (%s)\n", rms, status);
     fprintf(out, "Peak-to-Peak: %.2f V\n", p2p);
     fprintf(out, "DC Offset: %.2f V\n", dc);
     fprintf(out, "Clipping Count: %d\n", clips);
+
+    fprintf(out, "Std Deviation: %.4f V\n", std_dev);//STANDARD DEVIATION AND VARIANCE
 
     //finalise the function
     fclose(out);
